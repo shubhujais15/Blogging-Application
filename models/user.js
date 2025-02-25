@@ -55,7 +55,7 @@ userSchema.pre("save", function(next) {
     next();
 });
 
-// Creating virtual function named matchPassword to find user by matching hashed password
+// Creating virtual function named matchPasswordAndGenerateToken to find user by matching hashed password
 userSchema.static('matchPasswordAndGenerateToken', async function(email,password){
     const user = await this.findOne({email});
 
