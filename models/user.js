@@ -1,6 +1,7 @@
 const { Schema, model } = require('mongoose');
 // No need to install crypto, it is inbuilt
-const { createHmac, randomBytes } = require("crypto")
+const { createHmac, randomBytes } = require("crypto");
+const { createTokenForUser } = require('../services/authentication');
 
 const userSchema = new Schema({
     fullName: {
@@ -55,7 +56,7 @@ userSchema.pre("save", function(next) {
 });
 
 // Creating virtual function named matchPassword to find user by matching hashed password
-userSchema.static('matchPassword', async function(email,password){
+userSchema.static('matchPasswordAndGenerateToken', async function(email,password){
     const user = await this.findOne({email});
 
     if(!user) throw new Error('User not found');
@@ -72,7 +73,11 @@ userSchema.static('matchPassword', async function(email,password){
 
     // If it is matched means user gave correct password then we return user object
     // Passing password as undefined to make our password safe
-    return { ...user, password:undefined, salt:undefined}
+    // return { ...user, password:undefined, salt:undefined}
+
+    // if password is matched then we return the token
+    const token = createTokenForUser(user);
+    return token;
 })
 
 const User = model('user',userSchema);
